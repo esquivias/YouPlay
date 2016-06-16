@@ -1,5 +1,5 @@
 # YouPlay
-A simple YouTube playlist with player that works with any framework.
+A simple YouTube playlist with player that works with any responsive framework.
 
 ## Requirements
 
