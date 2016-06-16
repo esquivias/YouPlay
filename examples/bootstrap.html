@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<title>YouPlay &bull; Bootstrap Example</title>
+		<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.6/css/bootstrap.min.css" integrity="sha384-1q8mTJOASx8j1Au+a5WDVnPi2lkFfwwEAa8hDDdjZlpLegxhjVME1fgjWPGmkzs7" crossorigin="anonymous">
+		<style type="text/css">
+			div.embed-responsive{
+				border: 1px solid transparent;
+			}
+		</style>
+	</head>
+	<body>
+		<div class="container">
+			<div class="row">
+				<div class="col-xs-12">
+					<h1>YouPlay</h1>
+					<p class="lead">A simple YouTube playlist with player that works with any framework.</p>
+					<hr/>
+				</div>
+			</div>
+		</div>
+		<div class="container" data-youplay-playlist-id="PLo-N9JlYdykNvdNJKmUaNF1fmIY2czW9v" data-youplay-api-key="AIzaSyAAhNiRKVnaC2F8vm9ZrHFkoTFyHcI8X6A">
+			<div class="row">
+				<div class="col-xs-12">
+					<h2 data-youplay-playlist-title></h2>
+					<p data-youplay-playlist-description></p>
+				</div>
+				<div class="col-sm-6">
+					<div class="embed-responsive embed-responsive-16by9">
+						<div data-youplay-player></div>
+					</div>
+				</div>
+				<div class="col-sm-6">
+					<div class="list-group" data-youplay-playlist-items>
+						<div class="list-group-item" data-youplay-playlist-item>
+							<div class="row">
+								<div class="col-sm-3 hidden-xs">
+									<img class="img-thumbnail img-responsive" data-youplay-playlist-item-thumbnail />
+								</div>
+								<div class="col-sm-9">
+									<h4 class="list-group-item-heading" data-youplay-playlist-item-title></h4>
+									<p class="list-group-item-text" data-youplay-playlist-item-channelTitle></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../youplay.js"></script>
+	</body>
+</html>
