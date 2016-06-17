@@ -1,5 +1,5 @@
 /*
- * YouPlay (v1.0)
+ * YouPlay (v1.1)
  * https://github.com/esquivias/YouPlay
  */
 var YouPlay = (function($, undefined){
@@ -22,7 +22,9 @@ var YouPlay = (function($, undefined){
 			max_results: 50,
 			thumbnail_quality: 'high',
 			active_class: 'active',
-			player_class: 'embed-responsive-item'
+			player_class: 'embed-responsive-item',
+			callback: null,
+			debug: false
 		},{
 			autoplay: $(element).data('youplay-autoplay'),
 			autonext: $(element).data('youplay-autonext'),
@@ -31,7 +33,9 @@ var YouPlay = (function($, undefined){
 			max_results: $(element).data('youplay-max-results'),
 			thumbnail_quality: $(element).data('youplay-thumbnail-quality'),
 			active_class: $(element).data('youplay-active-class'),
-			player_class: $(element).data('youplay-player-class')
+			player_class: $(element).data('youplay-player-class'),
+			callback: $(element).data('youplay-callback'),
+			debug: $(element).data('youplay-debug')
 		});
 		this.object = {
 			player: $(element).find("[data-youplay-player]"),
@@ -45,10 +49,12 @@ var YouPlay = (function($, undefined){
 	YouPlay.prototype = {
 		init: function(element){
 			if(typeof this.youtube.api_key === 'undefined' || typeof this.youtube.playlist_id === 'undefined'){
-				if(typeof this.youtube.api_key === 'undefined'){
-					console.error("Missing required data-youplay-api-key attribute.\nhttps://developers.google.com/youtube/v3/getting-started");
-				}else if(typeof this.youtube.playlist_id === 'undefined'){
-					console.error("Missing required data-youplay-playlist-id attribute.");
+				if(this.option.debug){
+					if(typeof this.youtube.api_key === 'undefined'){
+						console.error("Missing required data-youplay-api-key attribute.\nhttps://developers.google.com/youtube/v3/getting-started");
+					}else if(typeof this.youtube.playlist_id === 'undefined'){
+						console.error("Missing required data-youplay-playlist-id attribute.");
+					}
 				}
 				return false;
 			}
@@ -60,10 +66,9 @@ var YouPlay = (function($, undefined){
 			if(typeof $(element).data('youplay-autoplay') !== 'undefined'){
 				if(typeof $(element).data('youplay-mute') === 'undefined'){
 					this.option.mute = true;
-					this.option.sanity_mute = true;
-					console.log("YouPlay will automatically mute audio when autoplay is enabled.");
-				}else{
-					this.option.sanity_mute = false;
+					if(this.option.debug){
+						console.log("YouPlay will automatically mute audio when autoplay is enabled.");
+					}
 				}
 			}
 		},
@@ -73,6 +78,23 @@ var YouPlay = (function($, undefined){
 		},
 		requestYouTubeURL: function(name){
 			return this.youtube.url[name].replace('{{PLAYLIST_ID}}', this.youtube.playlist_id).replace('{{API_KEY}}', this.youtube.api_key).replace('{{MAX_RESULTS}}', this.option.max_results);
+		},
+		prepareCallback: function(method, data){
+			if(this.option.callback !== null){
+				if(typeof window[this.option.callback] !== 'undefined'){
+					if(typeof window[this.option.callback][method] !== 'undefined'){
+						window[this.option.callback][method](data);
+					}else{
+						if(this.option.debug){
+							console.log('YouPlay callback ' + this.option.callback + '.' + method + ' not found.');
+						}
+					}
+				}else{
+					if(this.option.debug){
+						console.error('YouPlay callback ' + this.option.callback + ' not found.');
+					}
+				}
+			}
 		},
 		populatePlaylist: function(){
 			var url = this.requestYouTubeURL('playlists');
@@ -111,7 +133,9 @@ var YouPlay = (function($, undefined){
 			var template = element.clone();
 			if(typeof item.status === 'undefined' || $.inArray(item.status.uploadStatus, ['rejected', 'deleted', 'failed']) === -1 && typeof item.snippet.thumbnails !== 'undefined'){
 				if(typeof item.snippet.thumbnails === 'undefined'){
-					console.log("YouPlay is not able to load " + item.snippet.resourceId.videoId + ", a private video.");
+					if(this.option.debug){
+						console.log("YouPlay is not able to load " + item.snippet.resourceId.videoId + ", a private video.");
+					}
 				}else{
 					var data = $.extend({
 						id: item.snippet.resourceId.videoId,
@@ -149,26 +173,32 @@ var YouPlay = (function($, undefined){
 						this_.onYouTubePlayerStateChange(e);
 					},
 					'onError': function(e){
-						console.log(e);
+						if(this_.option.debug){
+							console.log(e);
+						}
+						this_.prepareCallback('onError', e);
 					}
 				}
 			});
 		},
 		onYouTubePlayerReady: function(){
-			var this_ = this, tag = this.object.playlist_item.prop('tagName');
-			this.object.playlist_items.on('click', tag, function(e){
+			var this_ = this;
+			this.object.playlist_items.find('[data-youplay-playlist-item]').bind('click', function(e){
 				e.preventDefault();
-				this_.object.playlist_items.find(tag).removeClass(this_.option.active_class);
+				this_.object.playlist_items.find('[data-youplay-playlist-item]').removeClass(this_.option.active_class);
 				$(this).addClass(this_.option.active_class);
 				this_.object.YT_player.loadVideoById($(this).data('youplay-video-id'));
+				this_.prepareCallback('onPlaylistItem', this);
 			});
 			if(this.option.autoplay){
 				if(this.object.playlist_items.find('.' + this.option.active_class).length === 0){
-					this.object.playlist_items.find(tag).first().click();
+					this.object.playlist_items.find('[data-youplay-playlist-item]').first().click();
 				}
+				this.prepareCallback('onReady', true);
 			}else{
-				this.object.YT_player.cueVideoById(this.object.playlist_items.find(tag).first().addClass(this.option.active_class).data('youplay-video-id'));
+				this.object.YT_player.cueVideoById(this.object.playlist_items.find('[data-youplay-playlist-item]').first().addClass(this.option.active_class).data('youplay-video-id'));
 			}
+			this.prepareCallback('onReady', false);
 		},
 		onYouTubePlayerStateChange: function(e){
 			if (typeof e !== 'undefined'){
@@ -177,9 +207,12 @@ var YouPlay = (function($, undefined){
 				}
 				var next = null;
 				if(e.data === 0 && this.option.autonext){
-					next = this.object.playlist_items.find('.' + this.option.active_class).next()
+					next = this.object.playlist_items.find('[data-youplay-playlist-item].' + this.option.active_class).next()
 					if(next.length === 0 && this.option.loop){
-						next = this.object.playlist_items.find(this.object.playlist_item.prop('tagName')).first();
+						next = this.object.playlist_items.find('[data-youplay-playlist-item]').first();
+						this.prepareCallback('onLoop', true);
+					}else{
+						this.prepareCallback('onAutonext', next);
 					}
 					next.click();
 				}
@@ -189,9 +222,9 @@ var YouPlay = (function($, undefined){
 	return YouPlay;
 }(jQuery));
 $.fn.YouPlay = function(){
-  return this.each(function(){
-    this.youplay_object = new YouPlay(this);
-  });
+	return this.each(function(){
+		this.youplay_object = new YouPlay(this);
+	});
 };
 $(document).ready(function(){
 	$('[data-youplay-playlist-id]').each(function(index, element){
