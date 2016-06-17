@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+		<title>YouPlay &bull; Slick Slider Example</title>
+		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.css"/>
+		<link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick-theme.css"/>
+		<style type="text/css">
+			html, body {
+				margin: 0;
+				padding: 0;
+			}
+			* {
+				box-sizing: border-box;
+			}
+			.embed-responsive-item{
+				display: table;
+				margin: 0 auto;
+			}
+			.slider {
+				width: 50%;
+				margin: 100px auto;
+			}
+			.slick-slide {
+				margin: 0px 20px;
+			}
+			.slick-slide img {
+				width: 100%;
+			}
+			.slick-prev:before,
+			.slick-next:before {
+				color: black;
+			}
+		</style>
+	</head>
+	<body>
+		<div data-youplay-callback="youplay_slick" data-youplay-active-class="slick-active" data-youplay-playlist-id="PLo-N9JlYdykNvdNJKmUaNF1fmIY2czW9v" data-youplay-api-key="AIzaSyAAhNiRKVnaC2F8vm9ZrHFkoTFyHcI8X6A">
+			<div data-youplay-player></div>
+			<section class="center slider" data-youplay-playlist-items>
+				<div data-youplay-playlist-item>
+					<img data-youplay-playlist-item-thumbnail />
+				</div>
+			</section>
+		</div>
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+		<script type="text/javascript" src="../youplay.js"></script>
+		<script type="text/javascript" src="https://cdn.jsdelivr.net/jquery.slick/1.6.0/slick.min.js"></script>
+		<script type="text/javascript">
+			// YouPlay Callbacks
+			var youplay_slick = {
+				onReady: function(autoPlay){
+					$('.slider').slick({
+						centerMode: true
+					});
+				},
+				onPlaylistItem: function(item){
+					$('.slider').slick('slickGoTo',$(item).data('slick-index'));
+				}
+			};
+		</script>
+	</body>
+</html>
