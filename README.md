@@ -66,6 +66,18 @@ These attributes need to be defined, self explanatory:
 
   _high_ | default
 
+* **data-youplay-callback**
+
+  _null_
+  
+  _Please see [Callbacks](#callbacks) section below for more information._
+ 
+* **data-youplay-debug**
+
+  _false_ | true
+  
+  _If true, console logs and errors will output._
+
 ### Optional Data Attributes _(Presentation)_
 * **data-youplay-active-class**
 
@@ -75,8 +87,7 @@ These attributes need to be defined, self explanatory:
 
   _embed-responsive-item_
 
-
-## Player Objects (DOM):
+## Player Objects (DOM)
 
 * **data-youplay-player**
 
@@ -93,6 +104,51 @@ These attributes need to be defined, self explanatory:
   * **data-youplay-playlist-item**
   
     _Playlist Item Template_
+
+## Callbacks
+
+* **onError**
+
+	_returns error_
+
+* **onReady**
+
+ 	_returns boolean, is autoplay_
+
+* **onLoop**
+
+* **onAutonext**
+
+* **OnPlaylistItem**
+
+ 	_returns item object_
+
+
+
+### Example Callback Usage
+
+We'll need to start by setting the callback name using the data attribute:
+
+`HTML`
+````html
+<div data-youplay-playlist-id="" data-youplay-api-key="" data-youplay-callback="example">
+	...
+</div>
+````
+
+Then create that callback with the methods you want to use:
+
+`Javascript`
+````js
+var example = {
+	onReady: function(isAutoPlay){
+		// Do something
+	},
+	onPlaylistItem: function(item){
+		// Do something else
+	}
+};
+````
 
 ## Notes
 
