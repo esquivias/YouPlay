@@ -119,10 +119,11 @@ These attributes need to be defined, self explanatory:
 
 * **onAutonext**
 
+ 	_returns next item object_
+
 * **OnPlaylistItem**
 
  	_returns item object_
-
 
 
 ### Example Callback Usage
