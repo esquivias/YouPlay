@@ -1,5 +1,5 @@
 /*
- * YouPlay (v1.2)
+ * YouPlay (v1.3)
  * https://github.com/esquivias/YouPlay
  */
 var YouPlay = (function($, undefined){
@@ -79,6 +79,27 @@ var YouPlay = (function($, undefined){
 		requestYouTubeURL: function(name){
 			return this.youtube.url[name].replace('{{PLAYLIST_ID}}', this.youtube.playlist_id).replace('{{API_KEY}}', this.youtube.api_key).replace('{{MAX_RESULTS}}', this.option.max_results);
 		},
+		logError: function(data){
+			var this_ = this, data = $.parseJSON(data.responseText);
+			if(typeof data.error !== 'undefined'){
+				if(typeof data.error.errors !== 'undefined'){
+					$.each(data.error.errors, function(index, error){
+						if(this_.option.debug){
+							if(typeof error.message !== 'undefined'){
+								if(typeof error.reason !== 'undefined'){
+									console.log(error.reason + ": " + error.message);
+								}else{
+									console.log(error.message);
+								}
+							}
+							if(typeof error.extendedHelp !== 'undefined'){
+								console.log(error.extendedHelp);
+							}
+						}
+					});
+				}
+			}
+		},
 		prepareCallback: function(method, data){
 			if(this.option.callback !== null){
 				if(typeof window[this.option.callback] !== 'undefined'){
@@ -109,16 +130,28 @@ var YouPlay = (function($, undefined){
 			return data;
 		},
 		populatePlaylist: function(){
-			var url = this.requestYouTubeURL('playlists');
+			var this_ = this, url = this.requestYouTubeURL('playlists');
 			$.ajaxSetup({cache: false});
 			$.ajax(url, {
 				context: this,
 				dataType: 'json',
 				crossDomain: true,
-				error: function(){},
+				error: function(data){
+					this_.logError(data);
+				},
 				success: function(data){
-					this.object.playlist_title.html(data.items[0].snippet.title);
-					this.object.playlist_description.html(data.items[0].snippet.description);
+					if(typeof data.items !== 'undefined'){
+						if(typeof data.items[0] !== 'undefined'){
+							if(typeof data.items[0].snippet !== 'undefined'){
+								if(typeof data.items[0].snippet.title !== 'undefined'){
+									this.object.playlist_title.html(this.prepareValueFormat('playlistTitle', data.items[0].snippet.title));
+								}
+								if(typeof data.items[0].snippet.description !== 'undefined'){
+									this.object.playlist_description.html(this.prepareValueFormat('playlistDescription', data.items[0].snippet.description));
+								}
+							}
+						}
+					}
 				}
 			});
 		},
@@ -130,7 +163,9 @@ var YouPlay = (function($, undefined){
 				context: this,
 				dataType: 'json',
 				crossDomain: true,
-				error: function(){},
+				error: function(data){
+					this_.logError(data);
+				},
 				success: function(data){
 					if(data.kind === 'youtube#playlistItemListResponse'){
 						$.each(data.items, function(index, item){
@@ -155,6 +190,9 @@ var YouPlay = (function($, undefined){
 					},
 						item.snippet
 					);
+					if(this.option.debug){
+						console.log(data);
+					}
 					$.each(data, function(attribute, value){
 						value = this_.prepareValueFormat(attribute, value);
 						var tag = $(template).find('[data-youplay-playlist-item-'+attribute+']');
