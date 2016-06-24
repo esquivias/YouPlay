@@ -1,5 +1,5 @@
 /*
- * YouPlay (v1.3)
+ * YouPlay (v1.4)
  * https://github.com/esquivias/YouPlay
  */
 var YouPlay = (function($, undefined){
@@ -80,11 +80,11 @@ var YouPlay = (function($, undefined){
 			return this.youtube.url[name].replace('{{PLAYLIST_ID}}', this.youtube.playlist_id).replace('{{API_KEY}}', this.youtube.api_key).replace('{{MAX_RESULTS}}', this.option.max_results);
 		},
 		logError: function(data){
-			var this_ = this, data = $.parseJSON(data.responseText);
-			if(typeof data.error !== 'undefined'){
-				if(typeof data.error.errors !== 'undefined'){
-					$.each(data.error.errors, function(index, error){
-						if(this_.option.debug){
+			if(this.option.debug){
+				var this_ = this, data = $.parseJSON(data.responseText);
+				if(typeof data.error !== 'undefined'){
+					if(typeof data.error.errors !== 'undefined'){
+						$.each(data.error.errors, function(index, error){
 							if(typeof error.message !== 'undefined'){
 								if(typeof error.reason !== 'undefined'){
 									console.log(error.reason + ": " + error.message);
@@ -95,8 +95,8 @@ var YouPlay = (function($, undefined){
 							if(typeof error.extendedHelp !== 'undefined'){
 								console.log(error.extendedHelp);
 							}
-						}
-					});
+						});
+					}
 				}
 			}
 		},
