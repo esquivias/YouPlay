@@ -1,5 +1,5 @@
 /*
- * YouPlay (v1.1)
+ * YouPlay (v1.2)
  * https://github.com/esquivias/YouPlay
  */
 var YouPlay = (function($, undefined){
@@ -96,6 +96,18 @@ var YouPlay = (function($, undefined){
 				}
 			}
 		},
+		prepareValueFormat: function(attribute, data){
+			if(this.option.callback !== null){
+				if(typeof window[this.option.callback] !== 'undefined'){
+					if(typeof window[this.option.callback]['onFormat'] !== 'undefined'){
+						if(typeof window[this.option.callback]['onFormat'][attribute] !== 'undefined'){
+							data = window[this.option.callback]['onFormat'][attribute](data);
+						}
+					}
+				}
+			}
+			return data;
+		},
 		populatePlaylist: function(){
 			var url = this.requestYouTubeURL('playlists');
 			$.ajaxSetup({cache: false});
@@ -130,7 +142,7 @@ var YouPlay = (function($, undefined){
 			});
 		},
 		populatePlaylistItem: function(item, element){
-			var template = element.clone();
+			var this_ = this, template = element.clone();
 			if(typeof item.status === 'undefined' || $.inArray(item.status.uploadStatus, ['rejected', 'deleted', 'failed']) === -1 && typeof item.snippet.thumbnails !== 'undefined'){
 				if(typeof item.snippet.thumbnails === 'undefined'){
 					if(this.option.debug){
@@ -143,12 +155,14 @@ var YouPlay = (function($, undefined){
 					},
 						item.snippet
 					);
-					$.each(data, function(attribute,value){
+					$.each(data, function(attribute, value){
+						value = this_.prepareValueFormat(attribute, value);
 						var tag = $(template).find('[data-youplay-playlist-item-'+attribute+']');
 						if(tag.prop('tagName') != "IMG"){
 							tag.html(value);
 						}else{
-							tag.attr('src', value).attr('alt', data.title).attr('title', data.title);
+							var titleFormat = this_.prepareValueFormat('title', data.title);
+							tag.attr('src', value).attr('alt', titleFormat).attr('title', titleFormat);
 						}
 					});
 					template.attr('data-youplay-video-id', data.id).appendTo(this.object.playlist_items);
