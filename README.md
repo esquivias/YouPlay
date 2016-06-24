@@ -121,11 +121,14 @@ These attributes need to be defined, self explanatory:
 
  	_returns next item object_
 
-* **OnPlaylistItem**
+* **onPlaylistItem**
 
- 	_returns item object_
+ 	_returns current item object_
 
+* **onFormat**
 
+	_returns data to a function; named after the attribute to format_
+	
 ### Example Callback Usage
 
 We'll need to start by setting the callback name using the data attribute:
@@ -147,6 +150,12 @@ var example = {
 	},
 	onPlaylistItem: function(item){
 		// Do something else
+	},
+	onFormat: {
+		title: function(data){
+			return 'Formatted Title: ' + data;
+		}
+		// Other attributes
 	}
 };
 ````
