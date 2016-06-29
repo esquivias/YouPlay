@@ -30,8 +30,6 @@ YouPlay will generate a playlist based on the markup structure that you provide.
 
 _**That's it.** There's no need to initialize or configure YouPlay with Javascript._
 
-That conveniently takes us to how we actually configure YouPlay...
-
 ## Required Data Attributes
 
 These attributes need to be defined, self explanatory:
