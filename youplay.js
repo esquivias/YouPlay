@@ -1,5 +1,5 @@
 /*
- * YouPlay (v1.4)
+ * YouPlay (v1.5)
  * https://github.com/esquivias/YouPlay
  */
 var YouPlay = (function($, undefined){
@@ -157,6 +157,7 @@ var YouPlay = (function($, undefined){
 		},
 		populatePlaylistItems: function(){
 			var this_ = this, url = this.requestYouTubeURL('playlist_items');
+			var element = this_.object.playlist_item.clone();
 			this.object.playlist_items.html('');
 			$.ajaxSetup ({cache: false});
 			$.ajax(url, {
@@ -169,15 +170,15 @@ var YouPlay = (function($, undefined){
 				success: function(data){
 					if(data.kind === 'youtube#playlistItemListResponse'){
 						$.each(data.items, function(index, item){
-							this_.populatePlaylistItem(item, this_.object.playlist_item);
+							this_.populatePlaylistItem(item, element.clone());
 						});
 						this.populateYouTubePlayer();
 					}
 				}
 			});
 		},
-		populatePlaylistItem: function(item, element){
-			var this_ = this, template = element.clone();
+		populatePlaylistItem: function(item, template){
+			var this_ = this;
 			if(typeof item.status === 'undefined' || $.inArray(item.status.uploadStatus, ['rejected', 'deleted', 'failed']) === -1 && typeof item.snippet.thumbnails !== 'undefined'){
 				if(typeof item.snippet.thumbnails === 'undefined'){
 					if(this.option.debug){
