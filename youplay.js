@@ -1,5 +1,5 @@
 /*
- * YouPlay (v1.5)
+ * YouPlay (v1.6)
  * https://github.com/esquivias/YouPlay
  */
 var YouPlay = (function($, undefined){
@@ -42,7 +42,8 @@ var YouPlay = (function($, undefined){
 			playlist_title: $(element).find("[data-youplay-playlist-title]"),
 			playlist_description: $(element).find("[data-youplay-playlist-description]"),
 			playlist_items: $(element).find("[data-youplay-playlist-items]"),
-			playlist_item: $(element).find("[data-youplay-playlist-item]")
+			playlist_item: $(element).find("[data-youplay-playlist-item]"),
+			player_state: -1
 		}
 		this.init(element);
 	}
@@ -185,6 +186,11 @@ var YouPlay = (function($, undefined){
 						console.log("YouPlay is not able to load " + item.snippet.resourceId.videoId + ", a private video.");
 					}
 				}else{
+                    var thumbnailObject = item.snippet.thumbnails[this.option.thumbnail_quality];
+                    var thumbnailImage = "https://i.ytimg.com/img/no_thumbnail.jpg";
+                    if(thumbnailObject.hasOwnProperty("url")){
+                    	thumbnailImage = thumbnailObject.url;
+                    }
 					var data = $.extend({
 						id: item.snippet.resourceId.videoId,
 						thumbnail: item.snippet.thumbnails[this.option.thumbnail_quality].url
@@ -241,6 +247,9 @@ var YouPlay = (function($, undefined){
 				this_.object.playlist_items.find('[data-youplay-playlist-item]').removeClass(this_.option.active_class);
 				$(this).addClass(this_.option.active_class);
 				this_.object.YT_player.loadVideoById($(this).data('youplay-video-id'));
+				if(this_.object.player_state != 1){
+					this_.object.YT_player.stopVideo();
+				}
 				this_.prepareCallback('onPlaylistItem', this);
 			});
 			if(this.option.autoplay){
@@ -258,9 +267,15 @@ var YouPlay = (function($, undefined){
 				if(this.option.mute){
 					this.object.YT_player.mute();
 				}
+                if(this.object.YT_player.getPlayerState() == 1){
+                	this.object.player_state = 1;
+                }
+                if(this.object.YT_player.getPlayerState() == 2){
+                	this.object.player_state = 2;
+                }
 				var next = null;
 				if(e.data === 0 && this.option.autonext){
-					next = this.object.playlist_items.find('[data-youplay-playlist-item].' + this.option.active_class).next()
+					next = this.object.playlist_items.find('[data-youplay-playlist-item].' + this.option.active_class).next();
 					if(next.length === 0 && this.option.loop){
 						next = this.object.playlist_items.find('[data-youplay-playlist-item]').first();
 						this.prepareCallback('onLoop', true);
